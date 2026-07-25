@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rey de la Cancha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0E2438;
+  --panel:#153349;
+  --panel-2:#1B3E58;
+  --line:#F4F7F2;
+  --lime:#D4F14D;
+  --clay:#FF7A45;
+  --muted:#7FA0B3;
+  --danger:#FF5A5A;
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(circle at 20% 0%, #163a52 0%, var(--navy) 55%);
+  color:var(--line);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  padding-bottom:60px;
+}
+h1,h2,h3,.display{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.03em;}
+.mono{font-family:'JetBrains Mono',monospace;}
+header.topbar{
+  position:sticky;top:0;z-index:20;
+  background:rgba(14,36,56,0.92);backdrop-filter:blur(6px);
+  border-bottom:1px solid rgba(212,241,77,0.15);
+  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand .ball{width:22px;height:22px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime);}
+.brand h1{font-size:1.15rem;margin:0;color:var(--line);}
+.brand small{display:block;color:var(--muted);font-family:'Inter';text-transform:none;letter-spacing:0;font-size:0.72rem;}
+.reset-btn{background:none;border:1px solid rgba(255,255,255,0.15);color:var(--muted);border-radius:8px;padding:7px 12px;font-size:0.78rem;cursor:pointer;font-family:'Inter';}
+.reset-btn:hover{border-color:var(--clay);color:var(--clay);}
+main{max-width:920px;margin:0 auto;padding:20px 16px 40px;}
+.steps{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+.step-pill{flex:1;min-width:120px;text-align:center;padding:8px 6px;border-radius:999px;background:var(--panel);color:var(--muted);font-size:0.72rem;font-family:'Oswald';letter-spacing:0.06em;text-transform:uppercase;border:1px solid transparent;}
+.step-pill.active{background:rgba(212,241,77,0.12);color:var(--lime);border-color:rgba(212,241,77,0.4);}
+.step-pill.done{color:var(--line);}
+.card{background:var(--panel);border-radius:var(--radius);padding:18px 18px 20px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);animation:rise .35s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.card h2{font-size:1rem;margin:0 0 12px;color:var(--lime);letter-spacing:0.05em;}
+.card h3{font-size:0.85rem;margin:0 0 10px;color:var(--line);}
+label{display:block;font-size:0.72rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;}
+input[type=text],input[type=time],input[type=number],select,textarea{
+  width:100%;background:var(--navy);border:1px solid rgba(255,255,255,0.12);color:var(--line);
+  border-radius:8px;padding:9px 10px;font-size:0.9rem;font-family:'Inter';
+}
+textarea{resize:vertical;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--lime);}
+.grid-players{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+@media(min-width:640px){.grid-players{grid-template-columns:repeat(4,1fr);}}
+.field{margin-bottom:0;}
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(min-width:560px){.config-grid{grid-template-columns:repeat(4,1fr);}}
+.summary{margin-top:12px;padding:10px 12px;background:rgba(212,241,77,0.08);border-left:3px solid var(--lime);border-radius:6px;font-size:0.82rem;color:var(--line);}
+.summary b{color:var(--lime);}
+.fixpair-row{display:flex;gap:8px;align-items:end;flex-wrap:wrap;}
+.fixpair-row>div{flex:1;min-width:130px;}
+.btn{cursor:pointer;border:none;border-radius:9px;padding:10px 16px;font-family:'Oswald';font-size:0.82rem;letter-spacing:0.04em;text-transform:uppercase;transition:transform .12s ease;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--lime);color:#0E2438;font-weight:700;}
+.btn-secondary{background:transparent;border:1px solid rgba(255,255,255,0.2);color:var(--line);}
+.btn-secondary:hover{border-color:var(--lime);color:var(--lime);}
+.btn-ghost{background:none;border:none;color:var(--muted);text-decoration:underline;font-family:'Inter';font-size:0.78rem;cursor:pointer;padding:0;}
+.btn:disabled{opacity:0.35;cursor:not-allowed;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.chip{background:var(--panel-2);border-radius:999px;padding:6px 12px 6px 14px;font-size:0.8rem;display:flex;align-items:center;gap:8px;}
+.chip .x{cursor:pointer;color:var(--danger);font-weight:700;}
+.chip.locked{border:1px solid rgba(212,241,77,0.4);}
+.pool-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.pool-list span{background:rgba(255,255,255,0.06);padding:4px 9px;border-radius:6px;font-size:0.78rem;color:var(--muted);}
+.error-msg{color:var(--danger);font-size:0.82rem;margin-top:10px;}
+.pairs-list{display:grid;grid-template-columns:1fr;gap:8px;margin-top:14px;}
+@media(min-width:640px){.pairs-list{grid-template-columns:1fr 1fr;}}
+.pair-card{background:var(--panel-2);border-radius:9px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:0.85rem;}
+.pair-card .tag{font-size:0.65rem;padding:2px 7px;border-radius:999px;text-transform:uppercase;font-family:'Oswald';letter-spacing:0.04em;}
+.tag.fija{background:rgba(212,241,77,0.18);color:var(--lime);}
+.tag.sorteada{background:rgba(127,160,179,0.2);color:var(--muted);}
+.lvl-tag{background:rgba(127,160,179,0.18);color:var(--muted);}
+.lvl-tag.warn{background:rgba(255,90,90,0.18);color:var(--danger);}
+.player-field{display:flex;flex-direction:column;gap:6px;}
+.lvl-sub{font-size:0.68rem;color:var(--muted);margin-top:2px;}
+.ladder{display:flex;flex-direction:column;gap:12px;margin-top:14px;}
+.court-card{background:var(--panel-2);border-radius:var(--radius);padding:14px 16px;border:1px solid rgba(255,255,255,0.05);position:relative;overflow:hidden;}
+.court-card.trono{border:1px solid rgba(212,241,77,0.55);box-shadow:0 0 22px rgba(212,241,77,0.12) inset;}
+.court-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.court-num{font-family:'Oswald';font-size:0.78rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;}
+.court-num b{color:var(--line);font-size:1rem;}
+.trono-badge{font-size:0.65rem;background:var(--lime);color:#0E2438;padding:3px 9px;border-radius:999px;font-family:'Oswald';letter-spacing:0.06em;text-transform:uppercase;font-weight:700;}
+.matchup{display:flex;align-items:center;gap:10px;}
+.pairbox{flex:1;background:var(--navy);border-radius:9px;padding:10px 12px;}
+.pairbox .nm{font-size:0.86rem;font-weight:600;}
+.pairbox.winner{border:1px solid var(--lime);}
+.pairbox.winner .nm::before{content:"👑 ";}
+.vs{font-family:'Oswald';color:var(--muted);font-size:0.75rem;}
+.score-row{display:flex;gap:8px;margin-top:10px;align-items:center;}
+.score-row .sfield{flex:1;}
+.score-row label{margin-bottom:2px;}
+.golden-row{margin-top:10px;display:flex;gap:8px;}
+.golden-row .btn{flex:1;font-size:0.7rem;padding:8px;}
+.confirm-wrap{margin-top:18px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;}
+.hist{margin-top:8px;}
+details.round-hist{background:var(--panel);border-radius:10px;padding:8px 12px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.06);}
+details.round-hist summary{cursor:pointer;font-family:'Oswald';font-size:0.8rem;letter-spacing:0.03em;color:var(--muted);}
+details.round-hist .rh-court{font-size:0.8rem;padding:6px 0;border-top:1px solid rgba(255,255,255,0.06);margin-top:6px;}
+.podium{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+.pod-row{display:flex;align-items:center;gap:12px;background:var(--panel-2);border-radius:10px;padding:12px 14px;}
+.pod-rank{font-family:'Oswald';font-size:1.3rem;color:var(--muted);width:34px;}
+.pod-row.p1 .pod-rank{color:#FFD24D;}
+.pod-row.p2 .pod-rank{color:#D6D6D6;}
+.pod-row.p3 .pod-rank{color:#CD8A54;}
+.pod-row.p1{border:1px solid rgba(255,210,77,0.5);}
+.timer{font-family:'JetBrains Mono';font-size:0.95rem;color:var(--lime);}
+.timer-display{text-align:center;padding:10px 0 6px;}
+.timer-phase{font-family:'Oswald';letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);font-size:0.85rem;margin-bottom:4px;}
+.timer-clock{font-size:2.8rem;font-weight:700;color:var(--lime);letter-spacing:0.02em;}
+.timer-controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.round-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+.round-times{color:var(--muted);font-size:0.82rem;}
+footer.note{max-width:920px;margin:20px auto 0;padding:0 16px;color:var(--muted);font-size:0.72rem;}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="ball"></div>
+    <div>
+      <h1>Rey de la Cancha</h1>
+      <small id="brand-sub">Sábados · configurable</small>
+    </div>
+  </div>
+  <button class="reset-btn" onclick="resetAll()">Reiniciar todo</button>
+</header>
+<main id="app"></main>
+<footer class="note">Los datos se guardan solo en esta sesión del navegador.</footer>
+
+<script>
+const DEFAULT_STATE = () => ({
+  step: 'setup',
+  players: Array.from({length:16}, (_,i)=>'Jugador '+(i+1)),
+  levels: Array.from({length:16}, ()=>'Medio'), // 'Medio' | 'Alto'
+  fixedPairs: [], // [ [idxA, idxB], ... ]
+  config: { rentalStart:'18:00', rentalMinutes:120, estimatedPlayTime:'18:00', warmupMinutes:5, breakMinutes:3, matchMinutesOverride:'', roundsOverride:'' },
+  pairs: [],           // generated pairs [{id,names:[a,b],fixed}]
+  pairsGenerated:false,
+  courtsGenerated:false,
+  schedule: [],
+  totalRounds: 0,
+  matchMinutes: null,
+  rounds: [],
+  currentRound: -1,
+  standings: null,
+  timer: { phase:'idle', phaseIdx:0, endTs:null, paused:false, remainingMs:0 },
+  returnStep: null
+});
+let state = DEFAULT_STATE();
+
+// ---------- persistence ----------
+async function saveState(){
+  try{ await window.storage.set('rey-cancha-estado', JSON.stringify(state), false); }catch(e){ /* storage unavailable, continue in-memory */ }
+}
+async function loadState(){
+  try{
+    const r = await window.storage.get('rey-cancha-estado', false);
+    if(r && r.value) state = JSON.parse(r.value);
+  }catch(e){ /* nothing saved yet or storage unavailable */ }
+  render();
+}
+function commit(){ render(); saveState(); }
+
+// ---------- time helpers ----------
+function toMin(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
+function toClock(mins){ mins=((mins%1440)+1440)%1440; const h=Math.floor(mins/60), m=mins%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
+function computeRoundsCount(cfg){
+  let n=0;
+  while(true){
+    const next=n+1;
+    const used = next*cfg.matchMinutes + (next-1)*cfg.breakMinutes;
+    if(used<=cfg.totalMinutes){ n=next; } else break;
+    if(n>60) break;
+  }
+  return Math.max(n,1);
+}
+function buildSchedule(startMin, matchMinutes, breakMinutes, n){
+  const out=[];
+  for(let i=0;i<n;i++){
+    const s = startMin + i*(matchMinutes+breakMinutes);
+    const e = s + matchMinutes;
+    out.push({start:toClock(s), end:toClock(e)});
+  }
+  return out;
+}
+// Busca, entre 15 y 20 minutos, la duración de partido más larga que aún permita
+// jugar el máximo número de rondas posible dentro del tiempo disponible.
+function computeOptimalMatch(availableMinutes, breakMinutes){
+  const nMax = computeRoundsCount({matchMinutes:15, breakMinutes, totalMinutes:availableMinutes});
+  for(let m=20; m>=15; m--){
+    const n = computeRoundsCount({matchMinutes:m, breakMinutes, totalMinutes:availableMinutes});
+    if(n===nMax) return {matchMinutes:m, totalRounds:n};
+  }
+  return {matchMinutes:15, totalRounds:nMax};
+}
+// Deriva, a partir de la hora de contratación de cancha y la hora real de inicio
+// de juego, cuánto tiempo queda realmente para jugar y arma el horario final.
+function getEffectiveConfig(){
+  const cfg = state.config;
+  const rentalStartMin = toMin(cfg.rentalStart);
+  const rentalEndMin = rentalStartMin + Number(cfg.rentalMinutes);
+  const gameStartMin = Math.max(toMin(cfg.estimatedPlayTime), rentalStartMin) + Number(cfg.warmupMinutes||0);
+  const availableMinutes = Math.max(rentalEndMin - gameStartMin, 0);
+  let matchMinutes;
+  if(cfg.matchMinutesOverride){ matchMinutes = Number(cfg.matchMinutesOverride); }
+  else { matchMinutes = computeOptimalMatch(availableMinutes, cfg.breakMinutes).matchMinutes; }
+  let totalRounds;
+  if(cfg.roundsOverride){ totalRounds = Number(cfg.roundsOverride); }
+  else { totalRounds = computeRoundsCount({matchMinutes, breakMinutes:cfg.breakMinutes, totalMinutes:availableMinutes}); }
+  const schedule = buildSchedule(gameStartMin, matchMinutes, cfg.breakMinutes, totalRounds);
+  const lastEndMin = toMin(schedule[schedule.length-1].end);
+  const overflow = lastEndMin > rentalEndMin;
+  return { rentalStartMin, rentalEndMin, gameStartMin, availableMinutes, matchMinutes, totalRounds, schedule, overflow, rentalEndClock:toClock(rentalEndMin) };
+}
+
+// ---------- game logic ----------
+function toNum(v){ return (v===''||v===null||v===undefined) ? null : Number(v); }
+function determineWinner(c){
+  const gA=toNum(c.gamesA), gB=toNum(c.gamesB);
+  if(gA===null||gB===null) return null;
+  if(gA>gB) return 'A';
+  if(gB>gA) return 'B';
+  const pA=toNum(c.pointsA), pB=toNum(c.pointsB);
+  if(pA===null||pB===null) return null;
+  if(pA>pB) return 'A';
+  if(pB>pA) return 'B';
+  if(c.golden) return c.golden;
+  return null;
+}
+function nextRoundCourts(round){
+  const N = round.courts.length;
+  const w = i => { const c=round.courts[i]; return determineWinner(c)==='A'?c.pairA:c.pairB; };
+  const l = i => { const c=round.courts[i]; return determineWinner(c)==='A'?c.pairB:c.pairA; };
+  const next = [];
+  for(let k=0;k<N;k++){
+    let pairA, pairB;
+    if(k===0){ pairA = w(0); pairB = w(1); }
+    else if(k===N-1){ pairA = l(N-2); pairB = l(N-1); }
+    else { pairA = l(k-1); pairB = w(k+1); }
+    next.push({court:k+1, pairA, pairB, gamesA:'', gamesB:'', pointsA:'', pointsB:'', golden:null});
+  }
+  return next;
+}
+function computeStandings(round){
+  const w = i => { const c=round.courts[i]; return determineWinner(c)==='A'?c.pairA:c.pairB; };
+  const l = i => { const c=round.courts[i]; return determineWinner(c)==='A'?c.pairB:c.pairA; };
+  const out=[];
+  round.courts.forEach((c,i)=>{ out.push(w(i)); out.push(l(i)); });
+  return out;
+}
+function pairLabel(p){ return p.names[0]+' & '+p.names[1]; }
+
+// ---------- setup step actions ----------
+function onNameChange(i, val){ state.players[i]=val.trim()||('Jugador '+(i+1)); commit(); }
+function onLevelChange(i, val){ state.levels[i]=val; commit(); }
+function onConfigChange(key, val){
+  if(key==='rentalMinutes'||key==='breakMinutes'||key==='warmupMinutes') val=Number(val);
+  state.config[key]=val; commit();
+}
+function maxFixedPairs(){ return Math.min(4, Math.floor(state.players.length/2)); }
+function resizePlayers(n){
+  n = Math.round(Number(n)/4)*4;
+  if(n<8) n=8;
+  const players=[...state.players], levels=[...state.levels];
+  while(players.length<n){ players.push('Jugador '+(players.length+1)); levels.push('Medio'); }
+  players.length=n; levels.length=n;
+  state.fixedPairs = state.fixedPairs.filter(([a,b])=> a<n && b<n).slice(0, Math.min(4, Math.floor(n/2)));
+  state.players=players; state.levels=levels;
+  commit();
+}
+function parseNamesList(text){
+  let lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  if(lines.length===1 && lines[0].indexOf(',')!==-1){
+    lines = lines[0].split(',').map(l=>l.trim()).filter(Boolean);
+  }
+  return lines
+    .map(l=> l.replace(/^\s*\d+[\.\)]\s*/,'').replace(/^[-•*]\s*/,'').trim())
+    .filter(Boolean);
+}
+function usarListaPegada(){
+  const ta = document.getElementById('paste-names');
+  const names = parseNamesList(ta.value);
+  if(names.length===0){ alert('No se detectó ningún nombre. Pega la lista (uno por línea) y vuelve a intentar.'); return; }
+  state.players = names;
+  state.levels = names.map(()=>'Medio');
+  state.fixedPairs = [];
+  ta.value='';
+  commit();
+}
+function fixPair(){
+  if(state.fixedPairs.length>=maxFixedPairs()){ alert('Ya alcanzaste el máximo de parejas fijas para esta cantidad de jugadores.'); return; }
+  const a=document.getElementById('sel-fix-a').value;
+  const b=document.getElementById('sel-fix-b').value;
+  if(a===''||b===''){ return; }
+  if(a===b){ alert('Selecciona dos jugadores distintos.'); return; }
+  state.fixedPairs.push([Number(a), Number(b)]);
+  commit();
+}
+function removeFixedPair(idx){ state.fixedPairs.splice(idx,1); commit(); }
+function fixedIndices(){ return new Set(state.fixedPairs.flat()); }
+
+function goToSorteo(){
+  const n = state.players.length;
+  if(n<8 || n%4!==0){ setErr('El número de jugadores debe ser múltiplo de 4 y de mínimo 8 (para al menos 2 canchas completas). Ahora hay '+n+'.'); return; }
+  const names = state.players.map(n=>n.trim());
+  if(names.some(n=>!n)){ setErr('Todos los jugadores necesitan un nombre.'); return; }
+  const lower = names.map(n=>n.toLowerCase());
+  if(new Set(lower).size !== lower.length){ setErr('Hay nombres repetidos. Cada jugador debe tener un nombre distinto.'); return; }
+  setErr('');
+  state.step='sorteo';
+  commit();
+}
+let errMsg='';
+function setErr(m){ errMsg=m; render(); }
+
+// ---------- sorteo step actions ----------
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function sortearParejas(){
+  const fixedSet = fixedIndices();
+  const remaining = state.players.map((n,i)=>i).filter(i=>!fixedSet.has(i));
+  const altos = shuffle(remaining.filter(i=>state.levels[i]==='Alto'));
+  const medios = shuffle(remaining.filter(i=>state.levels[i]!=='Alto'));
+  const randomPairs=[];
+  // empareja Alto+Medio mientras haya de ambos, para no cargar altos con altos
+  while(altos.length && medios.length){
+    randomPairs.push([altos.pop(), medios.pop()]);
+  }
+  // lo que sobre (todos del mismo nivel) se empareja entre sí, al azar
+  const leftover = altos.length ? altos : medios;
+  for(let i=0;i<leftover.length;i+=2){
+    randomPairs.push([leftover[i], leftover[i+1]]);
+  }
+  const pairs=[];
+  state.fixedPairs.forEach(([a,b])=>{
+    pairs.push({names:[state.players[a],state.players[b]], levels:[state.levels[a],state.levels[b]], fixed:true});
+  });
+  randomPairs.forEach(([a,b])=>{
+    pairs.push({names:[state.players[a],state.players[b]], levels:[state.levels[a],state.levels[b]], fixed:false});
+  });
+  pairs.forEach((p,i)=>p.id=i);
+  state.pairs = pairs;
+  state.pairsGenerated = true;
+  state.courtsGenerated = false;
+  commit();
+}
+function sortearCanchas(){
+  const shuffled = shuffle(state.pairs);
+  const eff = getEffectiveConfig();
+  const numCourts = Math.floor(state.players.length/4);
+  const courts = [];
+  for(let k=0;k<numCourts;k++){
+    courts.push({court:k+1, pairA:shuffled[k*2], pairB:shuffled[k*2+1], gamesA:'', gamesB:'', pointsA:'', pointsB:'', golden:null});
+  }
+  state.totalRounds = eff.totalRounds;
+  state.matchMinutes = eff.matchMinutes;
+  state.schedule = eff.schedule;
+  state.rounds = [{number:1, ...eff.schedule[0], courts}];
+  state.courtsGenerated = true;
+  state.timer = { phase:'idle', phaseIdx:0, endTs:null, paused:false, remainingMs:0 };
+  commit();
+}
+function iniciarRonda1(){ state.currentRound=0; state.step='juego'; commit(); }
+
+function volverAConfigurarHorario(){
+  state.returnStep = state.step;
+  state.step = 'setup';
+  commit();
+}
+function actualizarHorarioYVolver(){
+  const eff = getEffectiveConfig();
+  state.matchMinutes = eff.matchMinutes;
+  if(state.courtsGenerated && state.rounds.length){
+    state.totalRounds = eff.totalRounds;
+    state.schedule = eff.schedule;
+    state.rounds.forEach((r,i)=>{ if(eff.schedule[i]){ r.start = eff.schedule[i].start; r.end = eff.schedule[i].end; } });
+  }
+  state.step = state.returnStep || 'sorteo';
+  state.returnStep = null;
+  commit();
+}
+
+function roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+async function generateShareImage(){
+  if(document.fonts && document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+  const w=960, cardH=230, gap=22, headH=200, footH=70;
+  const round = state.rounds[0];
+  const numCourts = round.courts.length;
+  const h = headH + numCourts*cardH + (numCourts-1)*gap + footH;
+  const canvas = document.createElement('canvas');
+  canvas.width=w; canvas.height=h;
+  const ctx = canvas.getContext('2d');
+
+  const bg = ctx.createLinearGradient(0,0,0,h);
+  bg.addColorStop(0,'#163a52'); bg.addColorStop(1,'#0E2438');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
+
+  ctx.fillStyle='#D4F14D';
+  ctx.beginPath(); ctx.arc(64,64,14,0,Math.PI*2); ctx.fill();
+
+  ctx.fillStyle='#F4F7F2';
+  ctx.font="700 46px Oswald, sans-serif";
+  ctx.fillText('REY DE LA CANCHA', 96, 78);
+  ctx.fillStyle='#7FA0B3';
+  ctx.font="400 22px Inter, sans-serif";
+  ctx.fillText('Sorteo · Ronda 1 · Hora estimada de inicio '+round.start, 96, 112);
+  ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(96,140); ctx.lineTo(w-96,140); ctx.stroke();
+
+  let y = headH;
+  round.courts.forEach(c=>{
+    const isTrono = c.court===1;
+    ctx.fillStyle = isTrono ? 'rgba(212,241,77,0.10)' : 'rgba(255,255,255,0.05)';
+    roundRectPath(ctx,80,y,w-160,cardH,18); ctx.fill();
+    if(isTrono){ ctx.strokeStyle='#D4F14D'; ctx.lineWidth=3; roundRectPath(ctx,80,y,w-160,cardH,18); ctx.stroke(); }
+
+    ctx.fillStyle = isTrono ? '#D4F14D' : '#7FA0B3';
+    ctx.font="600 24px Oswald, sans-serif";
+    ctx.fillText((isTrono?'EL TRONO · ':'')+'CANCHA '+c.court, 112, y+42);
+
+    ctx.fillStyle='#F4F7F2';
+    ctx.font="700 30px Inter, sans-serif";
+    ctx.fillText(pairLabel(c.pairA), 112, y+92);
+    ctx.fillStyle='#7FA0B3'; ctx.font="400 19px Inter, sans-serif";
+    ctx.fillText(c.pairA.levels.join(' · '), 112, y+118);
+
+    ctx.fillStyle='#FF7A45'; ctx.font="700 20px Oswald, sans-serif";
+    ctx.fillText('VS', 112, y+150);
+
+    ctx.fillStyle='#F4F7F2'; ctx.font="700 30px Inter, sans-serif";
+    ctx.fillText(pairLabel(c.pairB), 112, y+190);
+    ctx.fillStyle='#7FA0B3'; ctx.font="400 19px Inter, sans-serif";
+    ctx.fillText(c.pairB.levels.join(' · '), 112, y+214);
+
+    y += cardH+gap;
+  });
+
+  ctx.fillStyle='#7FA0B3'; ctx.font="400 18px Inter, sans-serif";
+  ctx.fillText('Generado con Rey de la Cancha · '+new Date().toLocaleDateString('es-EC'), 96, h-30);
+
+  const link = document.createElement('a');
+  link.download = 'rey-de-la-cancha-sorteo.jpg';
+  link.href = canvas.toDataURL('image/jpeg', 0.92);
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+
+// ---------- juego step actions ----------
+function updateCourtField(rIdx, cIdx, field, val){
+  state.rounds[rIdx].courts[cIdx][field] = val;
+  commit();
+}
+function setGolden(rIdx,cIdx,side){ state.rounds[rIdx].courts[cIdx].golden = side; commit(); }
+
+function allCourtsDecided(round){ return round.courts.every(c=>determineWinner(c)!==null); }
+
+function confirmarRonda(){
+  const rIdx = state.currentRound;
+  const round = state.rounds[rIdx];
+  if(!allCourtsDecided(round)) return;
+  if(rIdx+1 < state.totalRounds){
+    const courts = nextRoundCourts(round);
+    const sch = state.schedule[rIdx+1];
+    state.rounds.push({number:rIdx+2, ...sch, courts});
+    state.currentRound = rIdx+1;
+  }else{
+    state.standings = computeStandings(round);
+    state.step='final';
+  }
+  commit();
+}
+function nuevoTorneo(){
+  if(!confirm('¿Iniciar un torneo nuevo? Se perderá el resultado actual.')) return;
+  state = DEFAULT_STATE();
+  commit();
+}
+function resetAll(){
+  if(!confirm('¿Reiniciar toda la configuración y el torneo en curso?')) return;
+  state = DEFAULT_STATE();
+  commit();
+}
+
+// ---------- cronómetro: calentamiento → partido → descanso → partido... ----------
+function buildPhases(){
+  const cfg = state.config;
+  const phases = [{type:'warmup', minutes:Number(cfg.warmupMinutes)||0}];
+  for(let i=0;i<state.totalRounds;i++){
+    phases.push({type:'match', minutes:state.matchMinutes, round:i+1});
+    if(i < state.totalRounds-1) phases.push({type:'break', minutes:Number(cfg.breakMinutes)});
+  }
+  phases.push({type:'done', minutes:0});
+  return phases;
+}
+function phaseLabel(t, phases){
+  if(!t || t.phase==='idle') return 'Listo para iniciar';
+  if(t.phase==='warmup') return 'Calentamiento';
+  if(t.phase==='break') return 'Descanso';
+  if(t.phase==='done') return 'Cronómetro finalizado';
+  if(t.phase==='match'){ const ph=phases[t.phaseIdx]; return 'Partido '+(ph&&ph.round||''); }
+  return '';
+}
+function startTimer(){
+  const phases = buildPhases();
+  state.timer = { phase:'warmup', phaseIdx:0, endTs:Date.now()+phases[0].minutes*60000, paused:false, remainingMs:0 };
+  commit();
+}
+function pauseResumeTimer(){
+  const t = state.timer;
+  if(t.phase==='idle'||t.phase==='done') return;
+  if(t.paused){ t.endTs = Date.now()+t.remainingMs; t.paused=false; }
+  else { t.remainingMs = Math.max(t.endTs-Date.now(),0); t.paused=true; }
+  commit();
+}
+function resetTimer(){
+  if(!confirm('¿Reiniciar el cronómetro desde el calentamiento?')) return;
+  state.timer = { phase:'idle', phaseIdx:0, endTs:null, paused:false, remainingMs:0 };
+  commit();
+}
+let alarmCtx = null;
+let alarmStopId = null;
+function stopAlarm(){
+  if(alarmCtx){ try{ alarmCtx.close(); }catch(e){} alarmCtx=null; }
+  if(alarmStopId){ clearTimeout(alarmStopId); alarmStopId=null; }
+}
+function playAlarm(){
+  stopAlarm();
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    alarmCtx = ctx;
+    const master = ctx.createGain();
+    master.gain.value = 1;
+    master.connect(ctx.destination);
+    const durationSec = 30;
+    const beepOn = 0.32, beepOff = 0.16, cycle = beepOn+beepOff;
+    const totalBeeps = Math.ceil(durationSec/cycle);
+    for(let i=0;i<totalBeeps;i++){
+      const t0 = i*cycle;
+      const freq = (i%2===0) ? 1046 : 784; // sirena de dos tonos, tipo silbato árbitro
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type='square';
+      osc.frequency.value=freq;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime+t0);
+      gain.gain.exponentialRampToValueAtTime(1, ctx.currentTime+t0+0.02);
+      gain.gain.setValueAtTime(1, ctx.currentTime+t0+beepOn-0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+t0+beepOn);
+      osc.connect(gain).connect(master);
+      osc.start(ctx.currentTime+t0);
+      osc.stop(ctx.currentTime+t0+beepOn+0.02);
+    }
+    alarmStopId = setTimeout(()=>{ if(alarmCtx===ctx){ try{ctx.close();}catch(e){} alarmCtx=null; } }, (durationSec+1)*1000);
+  }catch(e){ /* audio no disponible en este navegador */ }
+}
+function updateTimerDisplay(){
+  const el = document.getElementById('timer-clock');
+  if(!el) return;
+  const t = state.timer;
+  if(!t || t.phase==='idle'){ el.textContent='--:--'; return; }
+  if(t.phase==='done'){ el.textContent='00:00'; return; }
+  const remaining = t.paused ? t.remainingMs : Math.max(t.endTs-Date.now(),0);
+  const s = Math.ceil(remaining/1000);
+  el.textContent = String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+}
+setInterval(()=>{
+  const t = state.timer;
+  if(state.step!=='juego' || !t || t.phase==='idle' || t.phase==='done' || t.paused){ updateTimerDisplay(); return; }
+  if(Date.now() >= t.endTs){
+    playAlarm();
+    const phases = buildPhases();
+    const nextIdx = t.phaseIdx+1;
+    const next = phases[nextIdx];
+    if(!next || next.type==='done'){ state.timer = {phase:'done', phaseIdx:nextIdx, endTs:null, paused:false, remainingMs:0}; }
+    else { state.timer = {phase:next.type, phaseIdx:nextIdx, endTs:Date.now()+next.minutes*60000, paused:false, remainingMs:0}; }
+    render(); saveState();
+  }else{
+    updateTimerDisplay();
+  }
+}, 500);
+
+// ---------- render ----------
+function stepPill(key,label){
+  const order=['setup','sorteo','juego','final'];
+  const cur = order.indexOf(state.step);
+  const idx = order.indexOf(key);
+  let cls='step-pill'+(idx===cur?' active':'')+(idx<cur?' done':'');
+  return `<div class="${cls}">${label}</div>`;
+}
+
+function render(){
+  const app = document.getElementById('app');
+  let html = `<div class="steps">
+    ${stepPill('setup','1. Configuración')}
+    ${stepPill('sorteo','2. Sorteo')}
+    ${stepPill('juego','3. En juego')}
+    ${stepPill('final','4. Resultado')}
+  </div>`;
+
+  if(state.step==='setup') html += renderSetup();
+  else if(state.step==='sorteo') html += renderSorteo();
+  else if(state.step==='juego') html += renderJuego();
+  else if(state.step==='final') html += renderFinal();
+
+  app.innerHTML = html;
+  attachListeners();
+  updateTimerDisplay();
+  const sub = document.getElementById('brand-sub');
+  if(sub) sub.textContent = 'Sábados · '+state.players.length+' jugadores · '+Math.floor(state.players.length/4)+' canchas';
+}
+
+function renderSetup(){
+  const cfg = state.config;
+  const eff = getEffectiveConfig();
+  const first = eff.schedule[0], last = eff.schedule[eff.schedule.length-1];
+
+  const fixedSet = fixedIndices();
+  const avail = state.players.map((n,i)=>({i,n})).filter(x=>!fixedSet.has(x.i));
+  const optsA = avail.map(x=>`<option value="${x.i}">${x.n}</option>`).join('');
+
+  let html = `<div class="card">
+    <h2>Horario del evento</h2>
+    <div class="config-grid">
+      <div class="field"><label>Hora de contratación de la cancha</label>
+        <input type="time" value="${cfg.rentalStart}" onchange="onConfigChange('rentalStart', this.value)"></div>
+      <div class="field"><label>Duración del alquiler (min)</label>
+        <input type="number" min="30" step="5" value="${cfg.rentalMinutes}" onchange="onConfigChange('rentalMinutes', this.value)"></div>
+      <div class="field"><label>Hora estimada en que darán "Play"</label>
+        <input type="time" value="${cfg.estimatedPlayTime}" onchange="onConfigChange('estimatedPlayTime', this.value)"></div>
+      <div class="field"><label>Calentamiento antes del 1er partido (min)</label>
+        <input type="number" min="0" max="5" value="${cfg.warmupMinutes}" onchange="onConfigChange('warmupMinutes', this.value)"></div>
+      <div class="field"><label>Descanso entre partidos (min)</label>
+        <input type="number" min="1" max="10" value="${cfg.breakMinutes}" onchange="onConfigChange('breakMinutes', this.value)"></div>
+    </div>
+    <p style="color:var(--muted);font-size:0.8rem;margin:12px 0 0;">Recomendamos <b style="color:var(--line);">5 minutos</b> de calentamiento: alcanza para pelotear un poco sin restarle tiempo real de juego. Ese tiempo se cuenta después de "Play" y antes del primer partido. La cancha se entrega igual a las <b class="mono" style="color:var(--line);">${eff.rentalEndClock}</b>, así que la tardanza en llegar y el calentamiento se descuentan del tiempo de juego.</p>
+    <div class="config-grid" style="margin-top:14px;">
+      <div class="field"><label>Forzar minutos por partido (15–20, opcional)</label>
+        <input type="number" min="15" max="20" placeholder="Automático: ${computeOptimalMatch(eff.availableMinutes, cfg.breakMinutes).matchMinutes}" value="${cfg.matchMinutesOverride}" onchange="onConfigChange('matchMinutesOverride', this.value)"></div>
+      <div class="field"><label>Forzar número de rondas (opcional)</label>
+        <input type="number" min="1" placeholder="Automático: ${computeRoundsCount({matchMinutes: cfg.matchMinutesOverride?Number(cfg.matchMinutesOverride):computeOptimalMatch(eff.availableMinutes, cfg.breakMinutes).matchMinutes, breakMinutes:cfg.breakMinutes, totalMinutes:eff.availableMinutes})}" value="${cfg.roundsOverride}" onchange="onConfigChange('roundsOverride', this.value)"></div>
+    </div>
+    <div class="summary">
+      Tiempo real disponible para jugar: <b>${eff.availableMinutes} min</b> (después del calentamiento, hasta ${eff.rentalEndClock}).<br>
+      Duración de partido elegida: <b>${eff.matchMinutes} min</b> (ideal 20, mínimo 15) → <b>${eff.totalRounds} rondas</b>.<br>
+      Primer partido (estimado): <b>${first.start}–${first.end}</b>. Última ronda (estimada): <b>${last.start}–${last.end}</b>.
+    </div>
+    ${eff.overflow?`<div class="error-msg">El ajuste manual hace que la última ronda termine después de la hora de entrega de la cancha (${eff.rentalEndClock}). Reduce la duración o el número de rondas.</div>`:''}
+  </div>`;
+
+  html += `<div class="card">
+    <div class="round-head">
+      <h2 style="margin:0;">Jugadores (${state.players.length})</h2>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <label style="margin:0;">Cantidad</label>
+        <input type="number" min="8" step="4" value="${state.players.length}" style="width:80px;" onchange="resizePlayers(this.value)">
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:0.8rem;margin-top:-4px;">Debe ser múltiplo de 4 y mínimo 8, para completar canchas enteras (mínimo 2 canchas). El nivel se usa al sortear parejas: prioriza cruzar Alto con Medio.</p>
+    <details style="margin:10px 0 4px;">
+      <summary style="cursor:pointer;color:var(--lime);font-family:'Oswald';font-size:0.8rem;letter-spacing:0.04em;text-transform:uppercase;">📋 Pegar lista de jugadores</summary>
+      <p style="color:var(--muted);font-size:0.78rem;margin:8px 0;">Pega la lista copiada de WhatsApp u otra fuente (un nombre por línea, o separados por coma). Reemplaza los nombres actuales, en ese mismo orden, y ajusta la cantidad de jugadores automáticamente.</p>
+      <textarea id="paste-names" placeholder="Ana Torres&#10;Luis Peña&#10;María José&#10;..." rows="5"></textarea>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="usarListaPegada()">Usar esta lista</button>
+    </details>
+    <div class="grid-players" style="margin-top:10px;">
+      ${state.players.map((n,i)=>`<div class="field player-field">
+        <input type="text" value="${n}" onchange="onNameChange(${i}, this.value)">
+        <select onchange="onLevelChange(${i}, this.value)">
+          <option value="Medio" ${state.levels[i]!=='Alto'?'selected':''}>Nivel medio</option>
+          <option value="Alto" ${state.levels[i]==='Alto'?'selected':''}>Nivel alto</option>
+        </select>
+      </div>`).join('')}
+    </div>
+  </div>`;
+
+  html += `<div class="card">
+    <h2>Parejas fijas (opcional, máximo ${maxFixedPairs()})</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-top:-4px;">El resto de jugadores se sorteará al azar.</p>
+    ${state.fixedPairs.length<maxFixedPairs()?`<div class="fixpair-row">
+      <div><label>Jugador A</label><select id="sel-fix-a">${avail.length?optsA:'<option value="">—</option>'}</select></div>
+      <div><label>Jugador B</label><select id="sel-fix-b">${avail.length?optsA:'<option value="">—</option>'}</select></div>
+      <button class="btn btn-secondary" onclick="fixPair()">Fijar pareja</button>
+    </div>`:`<p style="color:var(--muted);font-size:0.82rem;">Ya alcanzaste el máximo de parejas fijas. Quita una para agregar otra.</p>`}
+    <div class="chips">
+      ${state.fixedPairs.map(([a,b],idx)=>`<div class="chip locked">🔒 ${state.players[a]} & ${state.players[b]} <span class="x" onclick="removeFixedPair(${idx})">✕</span></div>`).join('') || '<span style="color:var(--muted);font-size:0.8rem;">Ninguna pareja fija todavía.</span>'}
+    </div>
+  </div>`;
+
+  html += `<div class="confirm-wrap">
+    ${errMsg?`<div class="error-msg">${errMsg}</div>`:''}
+    ${state.returnStep
+      ? `<button class="btn btn-primary" onclick="actualizarHorarioYVolver()">✅ Actualizar horario y volver</button>`
+      : `<button class="btn btn-primary" onclick="goToSorteo()">Continuar al sorteo →</button>`}
+  </div>`;
+  return html;
+}
+
+function renderSorteo(){
+  let html = `<div class="card">
+    <div class="round-head">
+      <h2 style="margin:0;">Parejas</h2>
+      <button class="btn-ghost" onclick="volverAConfigurarHorario()">⚙️ Editar horario</button>
+    </div>`;
+  if(!state.pairsGenerated){
+    const fixedSet = fixedIndices();
+    const remainingIdx = state.players.map((n,i)=>i).filter(i=>!fixedSet.has(i));
+    html += `<p style="color:var(--muted);font-size:0.85rem;">Parejas fijas: ${state.fixedPairs.length}. Jugadores por sortear: ${remainingIdx.length}.</p>
+    <div class="pool-list">${remainingIdx.map(i=>`<span>${state.players[i]} · ${state.levels[i]}</span>`).join('')}</div>
+    <div style="margin-top:14px;"><button class="btn btn-primary" onclick="sortearParejas()">🎲 Sortear parejas</button></div>`;
+  }else{
+    html += `<div class="pairs-list">${state.pairs.map(p=>`<div class="pair-card"><span>Pareja ${p.id+1}: ${pairLabel(p)}</span><span style="display:flex;gap:6px;"><span class="tag ${(p.levels[0]==='Alto'&&p.levels[1]==='Alto')?'lvl-tag warn':'lvl-tag'}">${p.levels.join('+')}</span><span class="tag ${p.fixed?'fija':'sorteada'}">${p.fixed?'Fija':'Sorteada'}</span></span></div>`).join('')}</div>
+    <div style="margin-top:14px;"><button class="btn btn-secondary" onclick="sortearParejas()">🔁 Repetir sorteo de parejas</button></div>`;
+  }
+  html += `</div>`;
+
+  if(state.pairsGenerated){
+    html += `<div class="card"><h2>Canchas — Ronda 1</h2>`;
+    if(!state.courtsGenerated){
+      html += `<p style="color:var(--muted);font-size:0.85rem;">Sortea en qué cancha empieza cada pareja. La cancha 1 es el Trono.</p>
+      <button class="btn btn-primary" onclick="sortearCanchas()">🎲 Sortear canchas</button>`;
+    }else{
+      const round = state.rounds[0];
+      html += `<div class="ladder">${round.courts.map(c=>`
+        <div class="court-card ${c.court===1?'trono':''}">
+          <div class="court-head"><span class="court-num">Cancha <b>${c.court}</b></span>${c.court===1?'<span class="trono-badge">El Trono</span>':''}</div>
+          <div class="matchup"><div class="pairbox"><div class="nm">${pairLabel(c.pairA)}</div><div class="lvl-sub">${c.pairA.levels.join(' · ')}</div></div><span class="vs">VS</span><div class="pairbox"><div class="nm">${pairLabel(c.pairB)}</div><div class="lvl-sub">${c.pairB.levels.join(' · ')}</div></div></div>
+        </div>`).join('')}</div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-secondary" onclick="sortearCanchas()">🔁 Repetir sorteo de canchas</button>
+        <button class="btn btn-secondary" onclick="generateShareImage()">📸 Generar imagen para compartir</button>
+        <button class="btn btn-primary" onclick="iniciarRonda1()">Iniciar Ronda 1 →</button>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+  return html;
+}
+
+function courtScoreBlock(rIdx, cIdx, c){
+  const gA=toNum(c.gamesA), gB=toNum(c.gamesB);
+  const showPoints = gA!==null && gB!==null && gA===gB;
+  const pA=toNum(c.pointsA), pB=toNum(c.pointsB);
+  const showGolden = showPoints && pA!==null && pB!==null && pA===pB;
+  const w = determineWinner(c);
+  return `
+  <div class="court-card ${c.court===1?'trono':''}">
+    <div class="court-head"><span class="court-num">Cancha <b>${c.court}</b></span>${c.court===1?'<span class="trono-badge">El Trono</span>':''}</div>
+    <div class="matchup">
+      <div class="pairbox ${w==='A'?'winner':''}"><div class="nm">${pairLabel(c.pairA)}</div><div class="lvl-sub">${c.pairA.levels.join(' · ')}</div></div>
+      <span class="vs">VS</span>
+      <div class="pairbox ${w==='B'?'winner':''}"><div class="nm">${pairLabel(c.pairB)}</div><div class="lvl-sub">${c.pairB.levels.join(' · ')}</div></div>
+    </div>
+    <div class="score-row">
+      <div class="sfield"><label>Games A</label><input type="number" min="0" max="9" value="${c.gamesA}" onchange="updateCourtField(${rIdx},${cIdx},'gamesA',this.value)"></div>
+      <div class="sfield"><label>Games B</label><input type="number" min="0" max="9" value="${c.gamesB}" onchange="updateCourtField(${rIdx},${cIdx},'gamesB',this.value)"></div>
+    </div>
+    ${showPoints?`<div class="score-row">
+      <div class="sfield"><label>Puntos A (empate en games)</label><input type="number" min="0" value="${c.pointsA}" onchange="updateCourtField(${rIdx},${cIdx},'pointsA',this.value)"></div>
+      <div class="sfield"><label>Puntos B (empate en games)</label><input type="number" min="0" value="${c.pointsB}" onchange="updateCourtField(${rIdx},${cIdx},'pointsB',this.value)"></div>
+    </div>`:''}
+    ${showGolden?`<div class="golden-row">
+      <button class="btn btn-secondary ${c.golden==='A'?'btn-primary':''}" onclick="setGolden(${rIdx},${cIdx},'A')">🎾 Bola de oro: gana A</button>
+      <button class="btn btn-secondary ${c.golden==='B'?'btn-primary':''}" onclick="setGolden(${rIdx},${cIdx},'B')">🎾 Bola de oro: gana B</button>
+    </div>`:''}
+  </div>`;
+}
+
+function renderTimerCard(){
+  const t = state.timer;
+  const phases = buildPhases();
+  const label = phaseLabel(t, phases);
+  return `<div class="card">
+    <div class="round-head">
+      <h2 style="margin:0;">⏱ Cronómetro</h2>
+      <div style="display:flex;gap:14px;align-items:center;">
+        ${t.phase==='idle' ? `<button class="btn-ghost" onclick="volverAConfigurarHorario()">⚙️ Editar horario</button>` : ''}
+        <button class="btn-ghost" onclick="playAlarm()">🔊 Probar sonido</button>
+        <button class="btn-ghost" onclick="stopAlarm()">🔇 Detener</button>
+      </div>
+    </div>
+    <div class="timer-display">
+      <div class="timer-phase">${label}</div>
+      <div id="timer-clock" class="timer-clock mono">${t.phase==='idle'?'--:--':(t.phase==='done'?'00:00':'--:--')}</div>
+    </div>
+    <div class="timer-controls">
+      ${t.phase==='idle' ? `<button class="btn btn-primary" onclick="startTimer()">▶ Play — iniciar calentamiento (${state.config.warmupMinutes} min)</button>` : ''}
+      ${(t.phase!=='idle'&&t.phase!=='done') ? `<button class="btn btn-secondary" onclick="pauseResumeTimer()">${t.paused?'▶ Reanudar':'⏸ Pausar'}</button>` : ''}
+      ${t.phase!=='idle' ? `<button class="btn btn-secondary" onclick="resetTimer()">↺ Reiniciar cronómetro</button>` : ''}
+    </div>
+    ${t.phase==='done'?'<p style="color:var(--lime);font-size:0.85rem;margin-top:8px;">Se cumplió el tiempo total. Registra el resultado de la última ronda para ver la tabla final.</p>':''}
+  </div>`;
+}
+
+function renderJuego(){
+  const rIdx = state.currentRound;
+  const round = state.rounds[rIdx];
+  const ready = allCourtsDecided(round);
+  const isLast = rIdx+1 >= state.totalRounds;
+
+  let hist = '';
+  if(rIdx>0){
+    hist = `<div class="hist">${state.rounds.slice(0,rIdx).map(r=>`
+      <details class="round-hist"><summary>Ronda ${r.number} — ${r.start}–${r.end} ✅</summary>
+        ${r.courts.map(c=>{const w=determineWinner(c); return `<div class="rh-court">Cancha ${c.court}: ${pairLabel(c.pairA)} ${c.gamesA}–${c.gamesB} ${pairLabel(c.pairB)} — ganó ${w==='A'?pairLabel(c.pairA):pairLabel(c.pairB)}</div>`;}).join('')}
+      </details>`).join('')}</div>`;
+  }
+
+  return renderTimerCard() + `<div class="card">
+    <div class="round-head">
+      <h2 style="margin:0;">Ronda ${round.number} de ${state.totalRounds}</h2>
+      <span class="round-times">Horario estimado ${round.start} – ${round.end}</span>
+    </div>
+    ${hist}
+    <div class="ladder">${round.courts.map((c,i)=>courtScoreBlock(rIdx,i,c)).join('')}</div>
+    <div class="confirm-wrap">
+      <button class="btn btn-primary" ${ready?'':'disabled'} onclick="confirmarRonda()">${isLast?'Confirmar y ver resultado final →':'Confirmar ronda y avanzar →'}</button>
+      ${!ready?`<span style="color:var(--muted);font-size:0.78rem;">Completa el resultado de las ${round.courts.length} canchas para continuar.</span>`:''}
+    </div>
+  </div>`;
+}
+
+function renderFinal(){
+  const st = state.standings;
+  const medals=['🥇','🥈','🥉'];
+  return `<div class="card">
+    <h2>Resultado final</h2>
+    <div class="podium">
+      ${st.map((p,i)=>`<div class="pod-row p${i+1<=3?i+1:''}"><span class="pod-rank">${medals[i]||('#'+(i+1))}</span><span style="font-weight:600;">${pairLabel(p)}</span></div>`).join('')}
+    </div>
+    <div style="margin-top:18px;"><button class="btn btn-primary" onclick="nuevoTorneo()">Nuevo torneo</button></div>
+  </div>`;
+}
+
+function attachListeners(){ /* using inline handlers; nothing else needed */ }
+
+loadState();
+</script>
+</body>
+</html>
